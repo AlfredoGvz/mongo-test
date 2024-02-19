@@ -1,88 +1,46 @@
-const { MongoClient } = require("mongodb");
 const express = require("express");
+const { MongoClient } = require("mongodb");
 const { connectToDb, getDb } = require("./connection");
+
 const app = express();
+const PORT = process.env.PORT || 9090;
 
+const uri = process.env.MONGODB_URI;
+console.log(uri);
 
-const ENV = process.env.NODE_ENV || "development";
-console.log(ENV, '<<<<the ENV');
-
-let db;
-connectToDb((err) => {
-  if (!err) {
-    app.listen(9090, () => {
-      console.log("Server is online...");
+connectToDb(uri)
+  .then(() => {
+    console.log("Connected to MongoDB");
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
     });
-    db = getDb();
+  })
+  .catch((err) => {
+    console.error("Error connecting to MongoDB:", err);
+    process.exit(1);
+  });
+
+app.get("/api/cities", async (req, res) => {
+  try {
+    const db = getDb(); 
+    const cities = await db.collection("cities")
+    console.log(cities, '<<<logging the cities');
+    res.status(200).json({ cities }); 
+  } catch (error) {
+    console.error("Error fetching cities:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
-require("dotenv").config();
-
-let uri;
-
-if (ENV === "production") {
-  uri = process.env.PRODUCTION_MONGODB_URI;
-} else if (ENV === "test") {
-  uri = process.env.TEST_MONGODB_URI;
-} else {
-  uri = process.env.DEVELOPMENT_MONGODB_URI;
-}
-
-let dbConnection;
-
-module.exports = {
-  connectToDb: (cb) => {
-    MongoClient.connect(uri)
-      .then((client) => {
-        dbConnection = client.db();
-        return cb();
-      })
-      .catch((err) => {
-        console.log(err);
-        return cb(err);
-      });
-  },
-  getDb: () => dbConnection,
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-app.get("/api/cities", (request, response) => {
-  let cities = [];
-
-  db.collection("cities")
-    .find()
-    .forEach((city) => {
-      cities.push(city);
-    })
-    .then((response) => {
-      console.log(response, '<<<< reponse in the cities')
-      response.status(200).send({ cities: cities });
-    });
-});
-
-app.get("/api/toilets", (request, response) => {
-  let toilets = [];
-
-  db.collection("toilets")
-    .find()
-    .forEach((toilet) => toilets.push(toilet))
-    .then(() => {
-      response.status(200).send(toilets);
-    })
-    .catch((err) => console.log(err));
-});
+// app.get("/api/toilets", async (req, res) => {
+//   try {
+//     const db = getDb(); // Get database instance
+//     const toilets = await db.collection("toilets").find().toArray(); // Fetch all toilets
+//     res.status(200).json(toilets); // Send response with toilets array
+//   } catch (error) {
+//     console.error("Error fetching toilets:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// });
 
 module.exports = { app };
