@@ -20,17 +20,43 @@ connectToDb(uri)
     process.exit(1);
   });
 
-app.get("/api/cities", async (req, res) => {
+app.get("/api/cities", async (req, res, next) => {
   try {
     const db = getDb(); 
-    const cities = await db.collection("cities")
+    const cities = await db.collection("cities").find().toArray()
     console.log(cities, '<<<logging the cities');
-    res.status(200).json({ cities }); 
-  } catch (error) {
+    res.status(200).send({cities})
+  } catch(error) {
     console.error("Error fetching cities:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(404).send({message: 'Endpoint not found'}) 
   }
 });
+
+// app.use((err, req, res, next) => {
+//   console.log(err.code, 'manual reject errors middleware')
+//   if (err.status && err.message){
+//   res.status(err.status).send({ message: err.message })
+//   }
+//   else {
+//       next(err)
+//   }
+// })
+
+// app.use((err, req, res, next) => {
+//   console.log(err.code, 'primary error middleware')
+//   if {
+    
+//   }
+//   else {
+//       next(err)
+//       }
+//   })
+
+// app.use((err, req, res, next) => {
+//   console.log(err.code, 'edgecase error middleware')
+//   res.status(500).send({ message: 'Internal server error' })
+// })
+
 
 // app.get("/api/toilets", async (req, res) => {
 //   try {
