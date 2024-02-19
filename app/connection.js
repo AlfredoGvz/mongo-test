@@ -1,21 +1,35 @@
-const { MongoClient } = require("mongodb");
-require("dotenv").config({
-  path: `${__dirname}/../.env.test`,
-});
+const { MongoClient } = require('mongodb');
 
-const uri = process.env.MONGODB_URI;
-let dbConnection;
+const ENV = process.env.NODE_ENV || 'development';
+
+require("dotenv").config({
+  path: `${__dirname}/../.env.${ENV}`,
+});
+console.log(ENV, '<<<the ENV');
+
+const uri = process.env.MONGODB_URI
+console.log(uri, '<<<the URI')
+
 module.exports = {
-  connectToDb: (cb) => {
-    MongoClient.connect(uri)
+  connectToDb: () => {
+    if (!uri) {
+      throw new Error('MONGODB_URI not set');
+    }
+
+    return MongoClient.connect(uri)
       .then((client) => {
         dbConnection = client.db();
-        return cb();
+        console.log('Connected to MongoDB');
       })
       .catch((err) => {
-        console.log(err);
-        return cb(err);
+        console.error('Error connecting to MongoDB:', err);
+        throw err;
       });
   },
-  getDb: () => dbConnection,
+  getDb: () => {
+    if (!dbConnection) {
+      throw new Error('Database connection has not been established');
+    }
+    return dbConnection;
+  },
 };
