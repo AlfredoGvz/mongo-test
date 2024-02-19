@@ -1,8 +1,8 @@
 const toiletsData = require("./toilets.json");
-// const citiesData = require("./cities.json");
+const citiesData = require("./cities.json");
 const mongoose = require("mongoose");
 const Toilet = require("./scheema/scheema");
-// const City = require("./scheema/cityScheema");
+const City = require("./scheema/cityScheema");
 
 require("dotenv").config({
   path: `${__dirname}/./.env.test`,
@@ -14,11 +14,11 @@ const seed = mongoose
   .then(() => {
     console.log("Connected to MongoDB");
 
-    // runCities()
-    //   .then(() => runToilets())
-    //   .then(() => mongoose.disconnect());
+    runCities()
+      .then(() => runToilets())
+      .then(() => mongoose.disconnect());
 
-    runToilets().then(() => mongoose.disconnect());
+    // runToilets().then(() => mongoose.disconnect());
   })
   .catch((error) => {
     console.error("Error connecting to MongoDB:", error);
@@ -55,30 +55,30 @@ async function runToilets() {
   }
 }
 
-// async function runCities() {
-//   try {
-//     // await City.deleteMany({});
-//     for (const city of citiesData) {
-//       const existingCity = await City.findOne({
-//         display_name: city.display_name,
-//       });
-//       if (!existingCity) {
-//         const citySave = new City({
-//           latitude: city.lat,
-//           longitude: city.lon,
-//           city: city.name,
-//           location: city.display_name,
-//         });
-//         await citySave.save();
-//         console.log("City saved:", city.display_name);
-//         console.log("All cities saved successfully.");
-//       } else {
-//         console.log("City already exists ->", city.display_name);
-//       }
-//     }
-//   } catch (error) {
-//     console.error("Error saving cities:", error);
-//   }
-// }
+async function runCities() {
+  try {
+    // await City.deleteMany({});
+    for (const city of citiesData) {
+      const existingCity = await City.findOne({
+        display_name: city.display_name,
+      });
+      if (!existingCity) {
+        const citySave = new City({
+          latitude: city.lat,
+          longitude: city.lon,
+          city: city.name,
+          location: city.display_name,
+        });
+        await citySave.save();
+        console.log("City saved:", city.display_name);
+        console.log("All cities saved successfully.");
+      } else {
+        console.log("City already exists ->", city.display_name);
+      }
+    }
+  } catch (error) {
+    console.error("Error saving cities:", error);
+  }
+}
 
 module.exports = { seed };
