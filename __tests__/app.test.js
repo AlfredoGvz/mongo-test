@@ -3,7 +3,6 @@ const { app } = require('../app/app')
 const request = require('supertest')
 // const database = require('../app/connection')
 
-
 beforeEach(() => seedTestData());
 
 describe('/api/cities', (req, res) => {
@@ -37,3 +36,5 @@ describe('/api/cities', (req, res) => {
             })      
         })
     })
+
+    /api/city/toilet

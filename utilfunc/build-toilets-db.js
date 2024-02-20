@@ -1,4 +1,9 @@
-exports.Cities = [
+const fs = require('fs').promises;
+const cityWithToiletsSchema = require('../scheema/city-with-toilets-schema')
+const toiletSchema = require('../scheema/toilet-schema')
+const axios = require('axios');
+
+const cities = [
     {
       "place_id": 270010055,
       "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
@@ -159,5 +164,62 @@ exports.Cities = [
       "display_name": "City of Edinburgh, Alba / Scotland, United Kingdom",
       "boundingbox": ["55.8187919", "56.0040837", "-3.4495326", "-3.0749528"]
     }
-  ]
-  
+]
+
+
+
+async function populateToiletsInCities() {
+    try {
+        for (const city of cities) {
+            let { name, lat, lon } = city
+            console.log(city, '<<< each city object');
+            const info = await axios.get(
+                "https://www.refugerestrooms.org/api/v1/restrooms/by_location",
+                {
+                    params: {
+                        lat,
+                        lng: lon,
+                        page: 1,
+                        per_page: 25,
+                        offset: 0,
+                    },
+                }
+            );
+            const toiletsData = info.data;
+            let toilets = [];
+
+            for (const toiletData of toiletsData) {
+                const toilet = {
+                    refuge_id: toiletData.id,
+                    name: toiletData.name,
+                    street: toiletData.street,
+                    city: toiletData.city,
+                    country: toiletData.country,
+                    unisex: toiletData.unisex,
+                    changing_table: toiletData.changing_table,
+                    comment: toiletData.comment,
+                    latitude: toiletData.latitude,
+                    longitude: toiletData.longitude,
+                    distance: toiletData.distance,
+                    accessible: toiletData.accessible
+                };
+                toilets.push(toilet); // Add toilet to array
+            }
+
+            // Create a city object with the toilets array
+            const newCity = new cityWithToiletsSchema({
+                name,
+                lat,
+                lon,
+                toilets
+            });
+
+            await newCity.save(); // Save city to database
+            console.log("Toilets added to city:", name);
+        }
+    } catch (err) {
+        console.error("Error adding toilets to city:", err);
+    }
+}
+
+populateToiletsInCities();

@@ -1,3 +1,10 @@
+
+
+
+
+
+
+
 const express = require("express");
 const { MongoClient } = require("mongodb");
 const { connectToDb, getDb } = require("./connection");
@@ -32,41 +39,41 @@ app.get("/api/cities", async (req, res, next) => {
   }
 });
 
-// app.use((err, req, res, next) => {
-//   console.log(err.code, 'manual reject errors middleware')
-//   if (err.status && err.message){
-//   res.status(err.status).send({ message: err.message })
-//   }
-//   else {
-//       next(err)
-//   }
-// })
+app.use((err, req, res, next) => {
+  console.log(err.code, 'manual reject errors middleware')
+  if (err.status && err.message){
+  res.status(err.status).send({ message: err.message })
+  }
+  else {
+      next(err)
+  }
+})
 
-// app.use((err, req, res, next) => {
-//   console.log(err.code, 'primary error middleware')
-//   if {
+app.use((err, req, res, next) => {
+  console.log(err.code, 'primary error middleware')
+  if {
     
-//   }
-//   else {
-//       next(err)
-//       }
-//   })
+  }
+  else {
+      next(err)
+      }
+  })
 
-// app.use((err, req, res, next) => {
-//   console.log(err.code, 'edgecase error middleware')
-//   res.status(500).send({ message: 'Internal server error' })
-// })
+app.use((err, req, res, next) => {
+  console.log(err.code, 'edgecase error middleware')
+  res.status(500).send({ message: 'Internal server error' })
+})
 
 
-// app.get("/api/toilets", async (req, res) => {
-//   try {
-//     const db = getDb(); // Get database instance
-//     const toilets = await db.collection("toilets").find().toArray(); // Fetch all toilets
-//     res.status(200).json(toilets); // Send response with toilets array
-//   } catch (error) {
-//     console.error("Error fetching toilets:", error);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// });
+app.get("/api/toilets", async (req, res) => {
+  try {
+    const db = getDb(); // Get database instance
+    const toilets = await db.collection("toilets").find().toArray(); // Fetch all toilets
+    res.status(200).json(toilets); // Send response with toilets array
+  } catch (error) {
+    console.error("Error fetching toilets:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 module.exports = { app };
