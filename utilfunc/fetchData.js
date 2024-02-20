@@ -1,64 +1,56 @@
 const fs = require("fs").promises;
 const axios = require("axios");
 const schedule = require("node-schedule");
-const cities = require('../cities.json')
+const cities = require('../data/test-data/cities')
 
-// I was playing around with this one to see if i could get
-//cities and their information like: geolocation and other things
-// async function getCityLocation(city) {
-//   let apiUrl =
-//     "https://nominatim.openstreetmap.org/search?format=json&q=" +
-//     encodeURIComponent(city);
-//   //Nominatim is a search engine for OpenStreetMap data. It allows you to search for places by name and obtain their geolocation information.
+
+
+// async function getCityCoordinates(City) {
+//   let apiUrl = "https://nominatim.openstreetmap.org/search?format=json&q=" + encodeURIComponent(City);
 //   try {
-//     const containedData = await fs.readFile("cities.json", "utf-8");
-//     //Get the files with the cities info to append the data later on (writeFile and overwriting)
-//     const parsedData = JSON.parse(containedData);
-
-//     let positionInfo = await axios.get(apiUrl).then(({ data }) => {
-//       return data;
-//     });
-//     parsedData.push(positionInfo[0]);
-
-//     await fs.writeFile("cities.json", JSON.stringify(parsedData), (err) => {
-//       if (err) {
-//         console.log(err);
-//       } else {
-//         console.log("saved");
-//       }
-//     });
-//   } catch (err) {
-//     console.log(err);
+//     const response = await axios.get(apiUrl);
+//     if (response.data && response.data.length > 0) {
+//       console.log(response, '<<<coordinates response');
+//       const { lat, lon } = response.data[0]; 
+//       console.log(lat, lon)  // Extract latitude and longitude
+//       return { lat, lon };
+//     } else {
+//       throw new Error("City coordinates not found");
+//     }
+//   } catch (error) {
+//     console.error("Error fetching city coordinates:", error);
+//     throw error;
 //   }
 // }
 
-// let city = "Edinburgh, United Kingdom";
-// getCityLocation(city);
 
-========================================================================
-
-schedule.scheduleJob("*/3 * * * * *", async function () {
-
-  for (const city of cities)
-  try {
-    const info = await axios.get(
-      "https://www.refugerestrooms.org/api/v1/restrooms/by_location",
-      {
-        params: {
-          lat: 53.483959,
-          lng: -2.244644,
-          page: 1,
-          per_page: 25,
-          offset: 0,
-        },
+async function fetchToiletsDataForCities() {
+  for (const cityData of cities) {
+      try {
+          const { name, lat, lon } = cityData;
+          console.log(cityData, '<<<the city data in the fetch toilets');
+          const info = await axios.get(
+              "https://www.refugerestrooms.org/api/v1/restrooms/by_location",
+              {
+                  params: {
+                      lat,
+                      lng: lon,
+                      page: 1,
+                      per_page: 25,
+                      offset: 0,
+                  },
+              }
+          );
+          const data = info.data;
+          await fs.writeFile(`toilets_${name}.json`, JSON.stringify(data, null, 2));
+          console.log("Fetched and saved for city:", name);
+      } catch (err) {
+          console.error("Error fetching or saving data:", err);
       }
-    );
-    const data = info.data;
-    await fs.writeFile("toilets.json", JSON.stringify(data, null, 2));
-    console.log("Fetched and saved");
-  } catch (err) {
-    console.error("Error fetching or saving data:", err);
   }
-});
+}
 
-module.exports = { scheduledFetch, getCityLocation };
+fetchToiletsDataForCities();
+
+
+// module.exports = { getCityCoordinates };
