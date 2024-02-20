@@ -1,15 +1,19 @@
-const db = require("../app/connection");
+const { connectToDb, getDb } = require("../app/connection");
 const testData = require("../data/test-data/cities");
+let db = getDb();
+// async function seedTestData() {
+//   try {
+//     await db.connectToDb();
+//     const collection = db.getDb().collection("testCities");
+//     await collection.insertMany(testData);
+//     console.log("Test data seeded successfully.");
+//   } catch (error) {
+//     console.error("Error seeding test data:", error);
+//   }
+// }
 
-async function seedTestData() {
-  try {
-    await db.connectToDb();
-    const collection = db.getDb().collection("testCities");
-    await collection.insertMany(testData);
-    console.log("Test data seeded successfully.");
-  } catch (error) {
-    console.error("Error seeding test data:", error);
-  }
-}
+// module.exports = seedTestData;
 
-module.exports = seedTestData;
+db.find().then((result) => {
+  console.log(result);
+});
