@@ -1,7 +1,7 @@
 {
   "name": "stage4",
   "version": "1.0.0",
-  "description": "",
+  "description": "1- Fetching data from refuge api\r Using axios we fetch information about toilets from refuge api.\r We then store that information in JSON files to have the data we need to create our documents in our collections.\r Because I am using fs.writeFile(), which is going to override anything previusly stored in the JSON files on our side,\r if the data from refuge api is updated in any shape or form, it is going to be reflected in our JSON files updating our files\r with the latest updates on refuge api.",
   "main": "fetchData.js",
   "scripts": {
     "test": "jest"
